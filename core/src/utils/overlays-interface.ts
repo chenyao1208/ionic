@@ -27,7 +27,7 @@ export interface OverlayInterface {
   didDismiss: EventEmitter<OverlayEventDetail>;
 
   present(): Promise<void>;
-  dismiss(data?: any, role?: string): Promise<void>;
+  dismiss(data?: any, role?: string): Promise<boolean>;
 }
 
 export interface OverlayController {
@@ -40,7 +40,7 @@ export interface HTMLIonOverlayElement extends HTMLStencilElement {
   overlayIndex: number;
   backdropDismiss?: boolean;
 
-  dismiss(data?: any, role?: string): Promise<void>;
+  dismiss(data?: any, role?: string): Promise<boolean>;
 }
 
 // Overlay checks

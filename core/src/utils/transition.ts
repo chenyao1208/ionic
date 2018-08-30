@@ -30,7 +30,7 @@ function beforeTransition(opts: TransitionOptions) {
 
   setZIndex(enteringEl, leavingEl, opts.direction);
 
-  if (opts.showGoBack) {
+  if (opts.showGoBack === true) {
     enteringEl.classList.add('can-go-back');
   } else {
     enteringEl.classList.remove('can-go-back');
@@ -50,13 +50,11 @@ async function runTransition(opts: TransitionOptions): Promise<TransitionResult>
   return ani;
 }
 
-async function afterTransition(opts: TransitionOptions) {
+function afterTransition(opts: TransitionOptions) {
   const enteringEl = opts.enteringEl;
   const leavingEl = opts.leavingEl;
-  if (enteringEl) {
-    enteringEl.classList.remove('ion-page-invisible');
-  }
-  if (leavingEl) {
+  enteringEl.classList.remove('ion-page-invisible');
+  if (leavingEl !== undefined) {
     leavingEl.classList.remove('ion-page-invisible');
   }
 }
@@ -106,7 +104,7 @@ async function noAnimation(opts: TransitionOptions): Promise<TransitionResult> {
 }
 
 async function waitForReady(opts: TransitionOptions, defaultDeep: boolean) {
-  const deep = opts.deepWait != null ? opts.deepWait : defaultDeep;
+  const deep = opts.deepWait !== undefined ? opts.deepWait : defaultDeep;
   const promises = deep ? [
     deepReady(opts.enteringEl),
     deepReady(opts.leavingEl),
@@ -174,12 +172,12 @@ function shallowReady(el: Element | undefined): Promise<any> {
   return Promise.resolve();
 }
 
-export async function deepReady(el: Element | undefined): Promise<void> {
-  const element = el as HTMLStencilElement;
+export async function deepReady(el: any | undefined): Promise<void> {
+  const element = el as any;
   if (element) {
-    if (element.componentOnReady) {
+    if (element.componentOnReady != null) {
       const stencilEl = await element.componentOnReady();
-      if (stencilEl) {
+      if (stencilEl != null) {
         return;
       }
     }
@@ -203,12 +201,12 @@ function setZIndex(
   leavingEl: HTMLElement | undefined,
   direction: NavDirection | undefined,
 ) {
-  if (enteringEl) {
+  if (enteringEl !== undefined) {
     enteringEl.style.zIndex = (direction === 'back')
       ? '99'
       : '101';
   }
-  if (leavingEl) {
+  if (leavingEl !== undefined) {
     leavingEl.style.zIndex = '100';
   }
 }

@@ -137,12 +137,12 @@ export class Popover implements OverlayInterface {
     ev.stopPropagation();
     ev.preventDefault();
 
-    this.dismiss();
+    return this.dismiss();
   }
 
   @Listen('ionBackdropTap')
   protected onBackdropTap() {
-    this.dismiss(null, BACKDROP);
+    return this.dismiss(null, BACKDROP);
   }
 
   @Listen('ionPopoverDidPresent')

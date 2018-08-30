@@ -11,7 +11,7 @@ export class ReorderGroup {
 
   private selectedItemEl?: HTMLElement;
   private selectedItemHeight!: number;
-  private lastToIndex!: number;
+  private lastToIndex = -1;
   private cachedHeights: number[] = [];
   private scrollEl?: HTMLElement;
   private gesture?: Gesture;
@@ -39,6 +39,8 @@ export class ReorderGroup {
     if (this.gesture) {
       this.gesture.setDisabled(this.disabled);
     }
+    const a = { a: 2 };
+    delete a.a;
   }
 
   @Event() ionItemReorder!: EventEmitter;
@@ -149,7 +151,7 @@ export class ReorderGroup {
     const deltaY = scroll + currentY - ev.startY;
     const normalizedY = currentY - top;
     const toIndex = this.itemIndexForTop(normalizedY);
-    if (toIndex !== undefined && (toIndex !== this.lastToIndex)) {
+    if (toIndex !== this.lastToIndex) {
       const fromIndex = indexForItem(selectedItem);
       this.lastToIndex = toIndex;
 

@@ -314,6 +314,7 @@ export class Select {
             disabled: o.disabled,
             handler: () => {
               this.value = o.value;
+              // tslint:disable-next-line:no-floating-promises
               this.close();
             }
           } as SelectPopoverOption;
@@ -469,7 +470,7 @@ export class Select {
     let addPlaceholderClass = false;
 
     let selectText = this.selectedText || this.text;
-    if (!selectText && this.placeholder) {
+    if (selectText === undefined && this.placeholder) {
       selectText = this.placeholder;
       addPlaceholderClass = true;
     }

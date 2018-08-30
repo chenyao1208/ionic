@@ -128,9 +128,8 @@ export class Menu implements MenuI {
   @Event() protected ionMenuChange!: EventEmitter<MenuChangeEventDetail>;
 
   async componentWillLoad() {
-    if (this.type == null) {
-      this.type = this.config.get('menuType', this.mode === 'ios' ? 'reveal' : 'overlay');
-    }
+    this.type = this.type || this.config.get('menuType', this.mode === 'ios' ? 'reveal' : 'overlay');
+
     if (this.isServer) {
       this.disabled = true;
     } else {
@@ -144,7 +143,7 @@ export class Menu implements MenuI {
     }
     const el = this.el;
     const parent = el.parentNode as any;
-    const content = this.contentId
+    const content = this.contentId !== undefined
       ? document.getElementById(this.contentId)
       : parent && parent.querySelector && parent.querySelector('[main]');
 
@@ -164,7 +163,7 @@ export class Menu implements MenuI {
     this.sideChanged();
 
     let isEnabled = !this.disabled;
-    if (isEnabled === true || typeof isEnabled === 'undefined') {
+    if (isEnabled) {
       const menus = await this.menuCtrl!.getMenus();
       isEnabled = !menus.some((m: any) => {
         return m.side === this.side && !m.disabled;
@@ -222,9 +221,10 @@ export class Menu implements MenuI {
       if (shouldClose) {
         ev.preventDefault();
         ev.stopPropagation();
-        this.close();
+        return this.close();
       }
     }
+    return Promise.resolve(false);
   }
 
   @Method()
@@ -312,6 +312,7 @@ export class Menu implements MenuI {
     }
     if (this._isOpen) {
       return true;
+    // TODO error
     } else if (this.menuCtrl!.getOpen()) {
       return false;
     }
@@ -462,7 +463,8 @@ export class Menu implements MenuI {
     assert(this._isOpen, 'menu cannot be closed');
 
     this.isAnimating = true;
-    this.startAnimation(false, false);
+    const ani = this.animation!.reverse(true);
+    ani.playSync();
     this.afterAnimation(false);
   }
 

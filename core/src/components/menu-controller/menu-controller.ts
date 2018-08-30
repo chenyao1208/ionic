@@ -40,8 +40,8 @@ export class MenuController {
    */
   @Method()
   async close(menuId?: string): Promise<boolean> {
-    const menu = await (menuId ? this.get(menuId) : this.getOpen());
-    if (menu) {
+    const menu = await (menuId !== undefined ? this.get(menuId) : this.getOpen());
+    if (menu !== null) {
       return menu.close();
     }
     return false;
@@ -93,11 +93,13 @@ export class MenuController {
    */
   @Method()
   async isOpen(menuId?: string): Promise<boolean> {
-    if (menuId) {
+    if (menuId !== undefined) {
       const menu = await this.get(menuId);
-      return (menu && menu.isOpen()) || false;
+      return (menu !== null && menu.isOpen());
+    } else {
+      const menu = await this.getOpen();
+      return menu !== null;
     }
-    return !!this.getOpen();
   }
 
   /**
@@ -141,11 +143,12 @@ export class MenuController {
 
       // didn't find a menu side that is enabled
       // so try to get the first menu side found
-      return this.find(m => m.side === menuId) || null;
-    } else if (menuId) {
+      return this.find(m => m.side === menuId);
+
+    } else if (menuId !== undefined) {
       // the menuId was not left or right
       // so try to get the menu by its "id"
-      return this.find(m => m.menuId === menuId) || null;
+      return this.find(m => m.menuId === menuId);
     }
 
     // return the first enabled menu
@@ -216,7 +219,7 @@ export class MenuController {
     if (shouldOpen) {
       const openedMenu = await this.getOpen();
       if (openedMenu && menu.el !== openedMenu) {
-        openedMenu.setOpen(false, false);
+        return openedMenu.setOpen(false, false);
       }
     }
     return menu._setOpen(shouldOpen, animated);
@@ -238,7 +241,7 @@ export class MenuController {
 
   private find(predicate: (menu: MenuI) => boolean): HTMLIonMenuElement | null {
     const instance = this.menus.find(predicate);
-    if (instance) {
+    if (instance !== undefined) {
       return instance.el;
     }
     return null;

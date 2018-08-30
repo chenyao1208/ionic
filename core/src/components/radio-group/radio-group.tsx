@@ -79,8 +79,8 @@ export class RadioGroup {
 
   @Listen('ionSelect')
   onRadioSelect(ev: Event) {
-    const selectedRadio = ev.target as HTMLIonRadioElement;
-    if (selectedRadio) {
+    const selectedRadio = ev.target as HTMLIonRadioElement | null;
+    if (selectedRadio !== null) {
       this.value = selectedRadio.value;
     }
   }

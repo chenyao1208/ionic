@@ -204,10 +204,8 @@ export class PickerColumnCmp {
     // We have to prevent default in order to block scrolling under the picker
     // but we DO NOT have to stop propagation, since we still want
     // some "click" events to capture
-    if (detail.event) {
-      detail.event.preventDefault();
-      detail.event.stopPropagation();
-    }
+    detail.event.preventDefault();
+    detail.event.stopPropagation();
 
     // reset everything
     cancelAnimationFrame(this.rafId);
@@ -215,7 +213,7 @@ export class PickerColumnCmp {
     let minY = (options.length - 1);
     let maxY = 0;
     for (let i = 0; i < options.length; i++) {
-      if (!options[i].disabled) {
+      if (options[i].disabled !== true) {
         minY = Math.min(minY, i);
         maxY = Math.max(maxY, i);
       }
@@ -226,10 +224,8 @@ export class PickerColumnCmp {
   }
 
   private onMove(detail: GestureDetail) {
-    if (detail.event) {
-      detail.event.preventDefault();
-      detail.event.stopPropagation();
-    }
+    detail.event.preventDefault();
+    detail.event.stopPropagation();
 
     // update the scroll position relative to pointer start position
     let y = this.y + detail.deltaY;
@@ -280,7 +276,7 @@ export class PickerColumnCmp {
     let max = 0;
     const options = this.col.options;
     for (let i = 0; i < options.length; i++) {
-      if (!options[i].disabled) {
+      if (options[i].disabled !== true) {
         min = Math.min(min, i);
         max = Math.max(max, i);
       }
@@ -323,7 +319,7 @@ export class PickerColumnCmp {
         { col.options.map((o, index) =>
           <Button
             type="button"
-            class={{ 'picker-opt': true, 'picker-opt-disabled': !!o.disabled }}
+            class={{ 'picker-opt': true, 'picker-opt-disabled': o.disabled === true }}
             disable-activated
             opt-index={index}>
             {o.text}

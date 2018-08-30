@@ -12,9 +12,9 @@ function supportsPassive(node: Node) {
       node.addEventListener('optsTest', () => { return; }, opts);
     } catch {
       _sPassive = false;
-     }
+    }
   }
-  return !!_sPassive;
+  return _sPassive === true;
 }
 
 export function addEventListener(
@@ -29,9 +29,9 @@ export function addEventListener(
   // use event listener options when supported
   // otherwise it's just a boolean for the "capture" arg
   const listenerOpts = supportsPassive(el) ? {
-      'capture': !!opts.capture,
-      'passive': !!opts.passive,
-    } : !!opts.capture;
+      'capture': opts.capture === true,
+      'passive': opts.passive === true,
+    } : opts.capture === true;
 
   let add: string;
   let remove: string;

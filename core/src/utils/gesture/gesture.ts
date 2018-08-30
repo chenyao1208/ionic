@@ -147,6 +147,7 @@ export function createGesture(config: GestureConfig): Gesture {
     detail.startTimeStamp = detail.timeStamp;
 
     if (onWillStart) {
+      // tslint:disable-next-line:no-floating-promises
       onWillStart(detail).then(fireOnStart);
     } else {
       fireOnStart();

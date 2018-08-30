@@ -1,9 +1,5 @@
 
 export function renderDatetime(template: string, value: DatetimeData, locale: LocaleData) {
-  if (value === undefined) {
-    return undefined;
-  }
-
   const tokens: string[] = [];
   let hasText = false;
   FORMAT_KEYS.forEach((format, index) => {
@@ -32,7 +28,7 @@ export function renderDatetime(template: string, value: DatetimeData, locale: Lo
   return template;
 }
 
-export function renderTextFormat(format: string, value: any, date: DatetimeData | null, locale: LocaleData): string {
+export function renderTextFormat(format: string, value: any, date: DatetimeData, locale: LocaleData): string {
 
   if ((format === FORMAT_DDDD || format === FORMAT_DDD)) {
     try {
@@ -52,11 +48,15 @@ export function renderTextFormat(format: string, value: any, date: DatetimeData 
   }
 
   if (format === FORMAT_A) {
-    return date && date.hour ? date.hour < 12 ? 'AM' : 'PM' : value ? value.toUpperCase() : '';
+    return date.hour !== undefined
+      ? (date.hour < 12 ? 'AM' : 'PM')
+      : value ? value.toUpperCase() : '';
   }
 
   if (format === FORMAT_a) {
-    return date && date.hour ? date.hour < 12 ? 'am' : 'pm' : value ? value : '';
+    return date.hour !== undefined
+      ? (date.hour < 12 ? 'am' : 'pm')
+      : value || '';
   }
 
   if (value == null) {
@@ -101,7 +101,7 @@ export function dateValueRange(format: string, min: DatetimeData, max: DatetimeD
 
   if (format === FORMAT_YYYY || format === FORMAT_YY) {
     // year
-    if (!max.year || !min.year) {
+    if (max.year === undefined || min.year === undefined) {
       throw new Error('min and max year is undefined');
     }
 
@@ -156,10 +156,7 @@ export function dateSortValue(year: number | undefined, month: number | undefine
 }
 
 export function dateDataSortValue(data: DatetimeData): number {
-  if (data) {
-    return dateSortValue(data.year, data.month, data.day, data.hour, data.minute);
-  }
-  return -1;
+  return dateSortValue(data.year, data.month, data.day, data.hour, data.minute);
 }
 
 export function daysInMonth(month: number, year: number): number {
@@ -192,7 +189,7 @@ export function parseDate(val: string | undefined): DatetimeData | null {
     }
   }
 
-  if (parse == null) {
+  if (parse === null) {
     // wasn't able to parse the ISO datetime
     return null;
   }
@@ -329,53 +326,50 @@ export function convertFormatToKey(format: string): string | null {
 export function convertDataToISO(data: DatetimeData): string {
   // https://www.w3.org/TR/NOTE-datetime
   let rtn = '';
+  if (data.year !== undefined) {
+    // YYYY
+    rtn = fourDigit(data.year);
 
-  if (data) {
-    if (data.year) {
-      // YYYY
-      rtn = fourDigit(data.year);
+    if (data.month !== undefined) {
+      // YYYY-MM
+      rtn += '-' + twoDigit(data.month);
 
-      if (data.month) {
-        // YYYY-MM
-        rtn += '-' + twoDigit(data.month);
+      if (data.day !== undefined) {
+        // YYYY-MM-DD
+        rtn += '-' + twoDigit(data.day);
 
-        if (data.day) {
-          // YYYY-MM-DD
-          rtn += '-' + twoDigit(data.day);
+        if (data.hour !== undefined) {
+          // YYYY-MM-DDTHH:mm:SS
+          rtn += `T${twoDigit(data.hour)}:${twoDigit(data.minute)}:${twoDigit(data.second)}`;
 
-          if (data.hour) {
-            // YYYY-MM-DDTHH:mm:SS
-            rtn += `T${twoDigit(data.hour)}:${twoDigit(data.minute)}:${twoDigit(data.second)}`;
+          if (data.millisecond! > 0) {
+            // YYYY-MM-DDTHH:mm:SS.SSS
+            rtn += '.' + threeDigit(data.millisecond);
+          }
 
-            if (data.millisecond! > 0) {
-              // YYYY-MM-DDTHH:mm:SS.SSS
-              rtn += '.' + threeDigit(data.millisecond);
-            }
+          if (data.tzOffset === undefined) {
+            // YYYY-MM-DDTHH:mm:SSZ
+            rtn += 'Z';
 
-            if (data.tzOffset == null || data.tzOffset === 0) {
-              // YYYY-MM-DDTHH:mm:SSZ
-              rtn += 'Z';
-
-            } else {
-              // YYYY-MM-DDTHH:mm:SS+/-HH:mm
-              rtn += (data.tzOffset > 0 ? '+' : '-') + twoDigit(Math.floor(data.tzOffset / 60)) + ':' + twoDigit(data.tzOffset % 60);
-            }
+          } else {
+            // YYYY-MM-DDTHH:mm:SS+/-HH:mm
+            rtn += (data.tzOffset > 0 ? '+' : '-') + twoDigit(Math.floor(data.tzOffset / 60)) + ':' + twoDigit(data.tzOffset % 60);
           }
         }
       }
+    }
 
-    } else if (data.hour) {
-      // HH:mm
-      rtn = twoDigit(data.hour) + ':' + twoDigit(data.minute);
+  } else if (data.hour !== undefined) {
+    // HH:mm
+    rtn = twoDigit(data.hour) + ':' + twoDigit(data.minute);
 
-      if (data.second) {
-        // HH:mm:SS
-        rtn += ':' + twoDigit(data.second);
+    if (data.second !== undefined) {
+      // HH:mm:SS
+      rtn += ':' + twoDigit(data.second);
 
-        if (data.millisecond) {
-          // HH:mm:SS.SSS
-          rtn += '.' + threeDigit(data.millisecond);
-        }
+      if (data.millisecond !== undefined) {
+        // HH:mm:SS.SSS
+        rtn += '.' + threeDigit(data.millisecond);
       }
     }
   }
@@ -388,7 +382,7 @@ export function convertDataToISO(data: DatetimeData): string {
  * an array of strings, and clean up any user input
  */
 export function convertToArrayOfStrings(input: string | string[] | undefined | null, type: string): string[] | undefined {
-  if (!input) {
+  if (input == null) {
     return undefined;
   }
 
@@ -404,7 +398,7 @@ export function convertToArrayOfStrings(input: string | string[] | undefined | n
     values = input.map(val => val.toString().trim());
   }
 
-  if (!values || !values.length) {
+  if (values === undefined || values.length === 0) {
     console.warn(`Invalid "${type}Names". Must be an array of strings, or a comma separated string.`);
   }
 
@@ -432,7 +426,7 @@ export function convertToArrayOfNumbers(input: any[] | string | number, type: st
     values = [input];
   }
 
-  if (!values || !values.length) {
+  if (values.length === 0) {
     console.warn(`Invalid "${type}Values". Must be an array of numbers, or a comma separated string of numbers.`);
   }
 
@@ -452,7 +446,6 @@ function fourDigit(val: number | undefined): string {
 }
 
 export interface DatetimeData {
-  [key: string]: any;
   year?: number;
   month?: number;
   day?: number;

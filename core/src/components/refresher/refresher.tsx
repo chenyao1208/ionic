@@ -197,7 +197,7 @@ export class Refresher {
     // do nothing if it's actively refreshing
     // or it's in the way of closing
     // or this was never a startY
-    if (this.state & RefresherState._BUSY_) {
+    if ((this.state & RefresherState._BUSY_) !== 0) {
       return 2;
     }
 
@@ -242,7 +242,7 @@ export class Refresher {
     // move the scroll element within the content element
     this.setCss(deltaY, '0ms', true, '');
 
-    if (!deltaY) {
+    if (deltaY === 0) {
       // don't continue if there's no delta yet
       this.progress = 0;
       return 8;
